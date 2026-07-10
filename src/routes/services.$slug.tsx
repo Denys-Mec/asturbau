@@ -102,7 +102,9 @@ function ServicePage() {
 
             <h2 className="mt-3 text-3xl md:text-4xl">{t("service.aboutTitle")}</h2>
             <div className="mt-6 space-y-5 text-lg text-muted-foreground leading-relaxed">
-              <p>{s.desc}</p>
+              {s.desc.split('\n\n').map((para, idx) => (
+                <p key={idx}>{para}</p>
+              ))}
               {s.includes.map((block) => (
                 <p key={block.title}>
                   <span className="text-foreground font-medium">{block.title}: </span>

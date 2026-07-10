@@ -239,7 +239,7 @@ function HomePage() {
                   </div>
                   <div className="relative p-6 md:p-8">
                     <h3 className="text-xl text-white [text-shadow:0_2px_8px_rgb(0_0_0_/_0.6)]">{s.title}</h3>
-                    <p className="mt-2 text-sm text-white/85 [text-shadow:0_1px_6px_rgb(0_0_0_/_0.7)]">{s.desc}</p>
+                    <p className="mt-2 text-sm text-white/85 [text-shadow:0_1px_6px_rgb(0_0_0_/_0.7)]">{s.desc.split('\n\n')[0]}</p>
                     <div className="mt-3 inline-flex items-center gap-1 text-accent text-sm font-medium">
                       {t("services.more")} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </div>

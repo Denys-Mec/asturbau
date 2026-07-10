@@ -8,12 +8,12 @@ export const translations = {
     "nav.gallery": "Portafolio",
     "nav.contacts": "Contacto",
     "nav.menu": "Menú",
-    "brand.tagline": "Construcción",
+    "brand.tagline": "Reformas",
 
     // Hero (home)
     "hero.badge": "Asturias · España",
-    "hero.title.default": "Asturbau Construcción",
-    "hero.subtitle": "Construcción y reformas en Asturias",
+    "hero.title.default": "Asturbau",
+    "hero.subtitle": "Reformas integrales y acabados en Asturias",
     "hero.cta.default": "Solicitar presupuesto gratuito",
     "hero.cta.gallery": "Ver trabajos",
     "hero.stat1.n": "10+",
@@ -26,7 +26,7 @@ export const translations = {
     // About
     "about.tag": "Sobre nosotros",
     "about.title": "Reformas en Asturias",
-    "about.p1": "Asturbau Construcción es su socio de confianza en reformas integrales y construcción en Asturias. Ejecutamos proyectos llave en mano en todas sus fases: desde demolición y trabajos en bruto hasta acabados, sistemas de ingeniería y diseño de interiores. Trabajamos con propiedades residenciales y comerciales, adaptándonos al presupuesto y necesidades de cada cliente.",
+    "about.p1": "Asturbau es su socio de confianza en reformas integrales y acabados en Asturias. Ejecutamos proyectos llave en mano en todas sus fases: desde la demolición y trabajos en bruto hasta los acabados finales, instalaciones de ingeniería y diseño de interiores. Trabajamos con propiedades residenciales y comerciales, adaptándonos al presupuesto y necesidades de cada cliente.",
     "about.p2": "Nuestro equipo cuenta con más de 10 años de experiencia práctica y especialistas de distintos oficios: albañiles, fontaneros, electricistas, carpinteros y pintores.",
     "about.p3": "Trabajamos en todo el Principado de Asturias, con enfoque principal en Gijón, Oviedo y Avilés. Bajo acuerdo podemos desplazarnos a municipios cercanos.",
 
@@ -150,14 +150,14 @@ export const translations = {
     "form.toast.err": "No se ha podido enviar la solicitud",
 
     // Footer
-    "footer.desc": "Empresa de construcción y reformas en Asturias. Trabajo llave en mano.",
+    "footer.desc": "Empresa de reformas integrales en Asturias. Trabajo llave en mano.",
     "footer.menu": "Menú",
     "footer.contacts": "Contacto",
     "footer.services": "Servicios",
-    "footer.svc1": "Reformas llave en mano",
-    "footer.svc2": "Reconstrucción",
-    "footer.svc3": "Locales comerciales",
-    "footer.svc4": "Acabados",
+    "footer.svc1": "Reforma integral",
+    "footer.svc2": "Locales y oficinas",
+    "footer.svc3": "Planificación de espacios",
+    "footer.svc4": "Baños y alicatado",
     "footer.admin": "Admin",
 
     // 404
@@ -176,11 +176,11 @@ export const translations = {
     "nav.gallery": "Портфоліо",
     "nav.contacts": "Контакти",
     "nav.menu": "Меню",
-    "brand.tagline": "Construcción",
+    "brand.tagline": "Reformas",
 
     "hero.badge": "Asturias · España",
-    "hero.title.default": "Asturbau Construcción",
-    "hero.subtitle": "Будівництво та ремонт в Астурії",
+    "hero.title.default": "Asturbau",
+    "hero.subtitle": "Комплексний ремонт та оздоблення в Астурії",
     "hero.cta.default": "Отримати безкоштовний кошторис",
     "hero.cta.gallery": "Дивитись роботи",
     "hero.stat1.n": "10+",
@@ -192,7 +192,7 @@ export const translations = {
 
     "about.tag": "Про нас",
     "about.title": "Ремонтні роботи в Астурії",
-    "about.p1": "Asturbau Construcción — ваш надійний партнер у сфері комплексного ремонту та будівництва в Астурії. Виконуємо проєкти під ключ на всіх етапах: від демонтажу й чорнових робіт до фінішного оздоблення, інженерних систем і дизайну інтерʼєру. Працюємо з житловими та комерційними обʼєктами, підбираючи рішення під бюджет і потреби кожного клієнта.",
+    "about.p1": "Asturbau — ваш надійний партнер у сфері комплексного ремонту та оздоблення приміщень в Астурії. Виконуємо проєкти під ключ на всіх етапах: від демонтажу й чорнових робіт до фінішного оздоблення, інженерних систем і дизайну інтерʼєру. Працюємо з житловими та комерційними обʼєктами, підбираючи рішення під бюджет і потреби кожного клієнта.",
     "about.p2": "Наша команда — це понад 10 років практичного досвіду та фахівці різних спеціальностей: муляри, сантехніки, електрики, теслі та маляри.",
     "about.p3": "Працюємо по всьому Князівству Астурія, з основним фокусом на міста Хіхон, Овʼєдо та Авілес. За домовленістю можемо виїжджати у сусідні регіони князівства.",
 
@@ -303,14 +303,14 @@ export const translations = {
     "form.toast.ok": "Заявку прийнято! Зателефонуємо найближчим часом.",
     "form.toast.err": "Не вдалося надіслати заявку",
 
-    "footer.desc": "Будівельно-ремонтна компанія в Астурії. Робота під ключ.",
+    "footer.desc": "Компанія з комплексного ремонту та оздоблення в Астурії. Робота під ключ.",
     "footer.menu": "Меню",
     "footer.contacts": "Контакти",
     "footer.services": "Послуги",
-    "footer.svc1": "Ремонт під ключ",
-    "footer.svc2": "Реконструкція",
-    "footer.svc3": "Комерційні обʼєкти",
-    "footer.svc4": "Оздоблення",
+    "footer.svc1": "Комплексний ремонт",
+    "footer.svc2": "Комерція та офіси",
+    "footer.svc3": "Планування приміщень",
+    "footer.svc4": "Ванні кімнати та плитка",
     "footer.admin": "Адмін",
 
     "notfound.text": "Сторінку не знайдено.",
