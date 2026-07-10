@@ -3,7 +3,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Lightbox } from "@/components/Lightbox";
 import {
-  ArrowRight, Home, Building2, Layers, Flame,
+  ArrowRight, Home, Building2, Layers, Flame, Hammer, Bath,
   Phone, Star, MessageCircle, Send,
 } from "lucide-react";
 import { getSiteContent, getGallery } from "@/lib/content.functions";
@@ -69,8 +69,8 @@ export const Route = createFileRoute("/")({
   errorComponent: ErrorComponent,
 });
 
-// Icons matched to services in DB order
-const ICONS = [Home, Building2, Layers, Flame];
+// Icons matched to services
+const ICONS = [Home, Building2, Layers, Flame, Hammer, Bath];
 
 const DEFAULT_TESTIMONIALS = [
   { name: "Marta G.", text: "El equipo terminó la reforma del piso a tiempo y con una calidad impecable. ¡Gracias por su profesionalidad!", rating: 5 },
@@ -210,9 +210,8 @@ function HomePage() {
             <h2 className="mt-3 text-4xl md:text-5xl">{t("services.title")}</h2>
           </div>
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-6 gap-4">
-            {services.map((s, i) => {
+            {SERVICE_DEFS.map((s, i) => {
               const Icon = ICONS[i % ICONS.length];
-              const img = SERVICE_IMAGES[i % SERVICE_IMAGES.length];
               const smSpans = ["sm:col-span-4", "sm:col-span-2", "sm:col-span-2", "sm:col-span-4", "sm:col-span-4", "sm:col-span-2"];
               const span = smSpans[i % smSpans.length];
               return (
@@ -220,12 +219,12 @@ function HomePage() {
                   key={s.title}
                   id={`service-${i}`}
                   to="/services/$slug"
-                  params={{ slug: SERVICE_DEFS[i % SERVICE_DEFS.length].slug }}
+                  params={{ slug: s.slug }}
                   className={`group relative overflow-hidden bg-card border border-border hover:border-accent transition-colors min-h-[360px] md:min-h-[420px] isolate flex flex-col justify-end scroll-mt-20 ${span}`}
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center -z-10"
-                    style={{ backgroundImage: `url(${img})` }}
+                    style={{ backgroundImage: `url(${s.image})` }}
                     aria-hidden
                   />
                   <div
@@ -239,7 +238,7 @@ function HomePage() {
                   </div>
                   <div className="relative p-6 md:p-8">
                     <h3 className="text-xl text-white [text-shadow:0_2px_8px_rgb(0_0_0_/_0.6)]">{s.title}</h3>
-                    <p className="mt-2 text-sm text-white/85 [text-shadow:0_1px_6px_rgb(0_0_0_/_0.7)]">{s.desc.split('\n\n')[0]}</p>
+                    <p className="mt-2 text-sm text-white/85 [text-shadow:0_1px_6px_rgb(0_0_0_/_0.7)]">{s.shortDesc}</p>
                     <div className="mt-3 inline-flex items-center gap-1 text-accent text-sm font-medium">
                       {t("services.more")} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </div>
