@@ -12,6 +12,7 @@ import { useLanguage } from "@/i18n/context";
 
 export function SiteHeader({ phone = "+34 643 329 216" }: { phone?: string }) {
   const [open, setOpen] = useState(false);
+  const [servicesExpanded, setServicesExpanded] = useState(false);
   const { lang, t } = useLanguage();
   const services = getServices(lang);
 
@@ -95,20 +96,46 @@ export function SiteHeader({ phone = "+34 643 329 216" }: { phone?: string }) {
                 activeProps={{ className: "text-accent border-accent/40" }}
               >{item.label}</Link>
             ))}
-            <div className="py-2">
-              <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-3 font-semibold">{t("nav.services")}</div>
-              <div className="flex flex-col gap-3 pl-2 border-l border-border/60">
-                {services.map((s) => (
-                  <Link
-                    key={s.slug}
-                    to="/services/$slug"
-                    params={{ slug: s.slug }}
-                    onClick={() => setOpen(false)}
-                    className="text-sm text-foreground/80 hover:text-accent transition-colors py-1"
-                  >{s.shortTitle}</Link>
-                ))}
+
+            {/* Accordion for Services (mobile) */}
+            <div className="border-b border-border/40">
+              <button
+                type="button"
+                onClick={() => setServicesExpanded((prev) => !prev)}
+                className="w-full flex items-center justify-between py-2 text-base font-medium text-foreground hover:text-accent transition-colors"
+              >
+                <span>{t("nav.services")}</span>
+                <ChevronDown
+                  className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                    servicesExpanded ? "rotate-180 text-accent" : ""
+                  }`}
+                />
+              </button>
+
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  servicesExpanded ? "max-h-[500px] opacity-100 pb-4" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="flex flex-col gap-3 pl-3 border-l border-border/60 mt-1">
+                  {services.map((s) => (
+                    <Link
+                      key={s.slug}
+                      to="/services/$slug"
+                      params={{ slug: s.slug }}
+                      onClick={() => {
+                        setOpen(false);
+                        setServicesExpanded(false);
+                      }}
+                      className="text-sm text-foreground/80 hover:text-accent transition-colors py-1"
+                    >
+                      {s.shortTitle}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
+
             <div className="pt-4 border-t border-border mt-2">
               <a href={`tel:${phone.replace(/\s/g, "")}`} className="flex items-center gap-2 py-2 text-base font-medium text-accent hover:text-accent/80 transition-colors">
                 <Phone className="h-4 w-4" /> {phone}
