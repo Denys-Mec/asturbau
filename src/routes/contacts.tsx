@@ -28,7 +28,38 @@ function ContactsPage() {
   const { data } = useSuspenseQuery(siteContentQuery);
   const { t, lang } = useLanguage();
   const globalContacts = data.contacts ?? {};
-  const c = (globalContacts[lang] ?? globalContacts.es ?? globalContacts) ?? {};
+  
+  const c = (() => {
+    let resolved = (globalContacts[lang] ?? globalContacts.es ?? globalContacts) ?? {};
+    
+    if (lang === "es") {
+      const needsEsFallback = !globalContacts.es || resolved.address === "Астурія, Іспанія" || resolved.hours?.includes("Пн");
+      if (needsEsFallback) {
+        resolved = {
+          ...resolved,
+          company: resolved.company || "Asturbau Construcción",
+          address: "Asturias, España",
+          hours: resolved.hours === "Пн–Сб: 9:00 – 19:00" || !resolved.hours ? "Lun - Sáb: 9:00 - 19:00" : resolved.hours,
+          tagline: resolved.tagline === "Звʼяжіться з нами — підготуємо безкоштовний кошторис" || !resolved.tagline
+            ? "Contáctenos — prepararemos un presupuesto gratuito"
+            : resolved.tagline
+        };
+      }
+    } else {
+      const needsUkFallback = !globalContacts.uk || !resolved.address;
+      if (needsUkFallback) {
+        resolved = {
+          ...resolved,
+          company: resolved.company || "Asturbau Construcción",
+          address: "Астурія, Іспанія",
+          hours: resolved.hours || "Пн–Сб: 9:00 – 19:00",
+          tagline: resolved.tagline || "Звʼяжіться з нами — підготуємо безкоштовний кошторис"
+        };
+      }
+    }
+    return resolved;
+  })();
+
   const phone = globalContacts.phone || c.phone || "+34 643 329 216";
   const email = globalContacts.email || c.email || "info@asturbau.com";
 
