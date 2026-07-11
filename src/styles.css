@@ -4,17 +4,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Asturbau Construcción — concrete / industrial design system */
+/* Asturbau Construcción — modern concrete / elegant premium design system */
 
 @theme inline {
   --font-sans: "Inter", system-ui, sans-serif;
   --font-display: "Bebas Neue", "Inter", sans-serif;
 
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 6px;
-  --radius-xl: 8px;
-  --radius-2xl: 12px;
+  /* Smoother, softer premium roundings */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -43,9 +44,10 @@
 }
 
 :root {
-  --radius: 0.375rem;
+  /* Unified base radius */
+  --radius: 0.75rem;
 
-  /* Concrete palette */
+  /* Concrete palette with optimized contrasts */
   --background: oklch(0.97 0.003 70);
   --foreground: oklch(0.18 0.005 70);
 
@@ -74,29 +76,36 @@
   --input: oklch(0.86 0.004 70);
   --ring: oklch(0.68 0.18 45);
 
+  /* Modern gradients */
   --gradient-hero: radial-gradient(ellipse 120% 90% at 85% 50%, oklch(0.42 0.005 250) 0%, oklch(0.30 0.005 250) 35%, oklch(0.22 0.005 250) 100%);
-  --shadow-elegant: 0 20px 50px -20px oklch(0.18 0.005 70 / 0.35);
-  --shadow-card: 0 2px 12px -4px oklch(0.18 0.005 70 / 0.12);
+  --gradient-sec-light: linear-gradient(180deg, oklch(0.96 0.003 70) 0%, oklch(0.91 0.004 70) 100%);
+  --gradient-bg-light: linear-gradient(180deg, oklch(0.99 0.001 70) 0%, oklch(0.96 0.003 70) 100%);
+
+  --shadow-elegant: 0 20px 50px -20px oklch(0.18 0.005 70 / 0.25);
+  --shadow-card: 0 4px 20px -8px oklch(0.18 0.005 70 / 0.08);
 }
 
 .dark {
   --background: oklch(0.14 0.004 70);
   --foreground: oklch(0.96 0.003 70);
-  --card: oklch(0.20 0.005 70);
+  --card: oklch(0.18 0.005 70);
   --card-foreground: oklch(0.96 0.003 70);
-  --popover: oklch(0.20 0.005 70);
+  --popover: oklch(0.18 0.005 70);
   --popover-foreground: oklch(0.96 0.003 70);
   --primary: oklch(0.96 0.003 70);
   --primary-foreground: oklch(0.14 0.004 70);
-  --secondary: oklch(0.26 0.005 70);
+  --secondary: oklch(0.20 0.005 70);
   --secondary-foreground: oklch(0.96 0.003 70);
-  --muted: oklch(0.26 0.005 70);
+  --muted: oklch(0.20 0.005 70);
   --muted-foreground: oklch(0.68 0.006 70);
   --accent: oklch(0.68 0.18 45);
   --accent-foreground: oklch(0.99 0 0);
-  --border: oklch(0.30 0.005 70);
-  --input: oklch(0.30 0.005 70);
+  --border: oklch(0.24 0.005 70);
+  --input: oklch(0.24 0.005 70);
   --ring: oklch(0.68 0.18 45);
+
+  --gradient-sec-light: linear-gradient(180deg, oklch(0.20 0.005 70) 0%, oklch(0.14 0.004 70) 100%);
+  --gradient-bg-light: linear-gradient(180deg, oklch(0.17 0.004 70) 0%, oklch(0.12 0.004 70) 100%);
 }
 
 @layer base {
@@ -109,10 +118,44 @@
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
     font-weight: 700;
   }
 }
+
+/* Animations Keyframes */
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes revealIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Custom design utilities */
 
 @utility container-x {
   width: 100%;
@@ -131,8 +174,33 @@
   background: var(--gradient-hero);
 }
 
+@utility bg-gradient-sec {
+  background: var(--gradient-sec-light);
+}
+
+@utility bg-gradient-bg {
+  background: var(--gradient-bg-light);
+}
+
 @utility shadow-elegant {
   box-shadow: var(--shadow-elegant);
+}
+
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+/* Entry Animation Classes */
+@utility animate-reveal-up {
+  animation: revealUp 0.85s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@utility animate-reveal-in {
+  animation: revealIn 0.85s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@utility animate-fade-in {
+  animation: fadeIn 0.7s ease-out forwards;
 }
 
 /* Vertical masonry gallery columns */

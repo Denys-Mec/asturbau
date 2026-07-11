@@ -10,6 +10,7 @@ import { Lightbox } from "@/components/Lightbox";
 import { getGallery } from "@/lib/content.functions";
 import { getServices, getServiceBySlug, serviceExists } from "@/i18n/services";
 import { useLanguage } from "@/i18n/context";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 const galleryQuery = queryOptions({
   queryKey: ["gallery"],
@@ -80,7 +81,7 @@ function ServicePage() {
             <img src={s.image} alt={s.title} className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/70 to-black/40" />
           </div>
-          <div className="container-x py-20 md:py-32">
+          <div className="container-x py-20 md:py-32 animate-reveal-up">
 
             <h1 className="mt-3 text-4xl md:text-6xl text-white max-w-3xl">{s.title}</h1>
 
@@ -98,21 +99,20 @@ function ServicePage() {
         {/* DESCRIPTION */}
         <section className="section-y">
           <div className="container-x">
-            <div className="max-w-3xl">
-
-            <h2 className="mt-3 text-3xl md:text-4xl">{t("service.aboutTitle")}</h2>
-            <div className="mt-6 space-y-5 text-lg text-muted-foreground leading-relaxed">
-              {s.desc.split('\n\n').map((para, idx) => (
-                <p key={idx}>{para}</p>
-              ))}
-              {s.includes.map((block) => (
-                <p key={block.title}>
-                  <span className="text-foreground font-medium">{block.title}: </span>
-                  {block.items.join(", ")}.
-                </p>
-              ))}
-            </div>
-            </div>
+            <ScrollReveal className="max-w-3xl">
+              <h2 className="mt-3 text-3xl md:text-4xl">{t("service.aboutTitle")}</h2>
+              <div className="mt-6 space-y-5 text-lg text-muted-foreground leading-relaxed">
+                {s.desc.split('\n\n').map((para, idx) => (
+                  <p key={idx}>{para}</p>
+                ))}
+                {s.includes.map((block) => (
+                  <p key={block.title}>
+                    <span className="text-foreground font-medium">{block.title}: </span>
+                    {block.items.join(", ")}.
+                  </p>
+                ))}
+              </div>
+            </ScrollReveal>
           </div>
         </section>
 
@@ -120,46 +120,51 @@ function ServicePage() {
         {portfolio.length > 0 && (
           <section className="section-y bg-secondary">
             <div className="container-x">
-              <div className="max-w-2xl">
+              <ScrollReveal className="max-w-2xl">
                 <p className="text-xs uppercase tracking-[0.25em] text-accent font-semibold">{t("service.portfolio.tag")}</p>
                 <h2 className="mt-3 text-4xl md:text-5xl">{t("service.portfolio.title")}</h2>
-              </div>
+              </ScrollReveal>
               <div className="mt-10 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto scroll-smooth snap-x snap-mandatory">
                 <div className="flex gap-3 sm:gap-2 pb-2">
                   {portfolio.map((item, idx) => (
-                    <button
-                      type="button"
+                    <ScrollReveal
                       key={item.id}
-                      onClick={() => setLightboxIndex(idx)}
-                      className="relative block w-[78%] sm:w-[320px] md:w-[360px] aspect-[3/4] overflow-hidden bg-concrete-dark group shrink-0 snap-start cursor-zoom-in"
-                      aria-label={item.title ?? t("portfolio.altDefault")}
+                      delay={idx * 100}
+                      className="shrink-0 snap-start"
                     >
-                      {item.type === "video" ? (
-                        <video
-                          src={item.thumbnail_url ? item.url : `${item.url}#t=0.5`}
-                          poster={item.thumbnail_url ?? undefined}
-                          muted
-                          playsInline
-                          preload="metadata"
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                        />
-                      ) : (
-                        <img
-                          src={item.thumbnail_url ?? item.url}
-                          alt={item.title ?? t("portfolio.altDefault")}
-                          loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      )}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => setLightboxIndex(idx)}
+                        className="relative block w-[280px] sm:w-[320px] md:w-[360px] aspect-[3/4] overflow-hidden bg-concrete-dark group cursor-zoom-in rounded-lg"
+                        aria-label={item.title ?? t("portfolio.altDefault")}
+                      >
+                        {item.type === "video" ? (
+                          <video
+                            src={item.thumbnail_url ? item.url : `${item.url}#t=0.5`}
+                            poster={item.thumbnail_url ?? undefined}
+                            muted
+                            playsInline
+                            preload="metadata"
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                          />
+                        ) : (
+                          <img
+                            src={item.thumbnail_url ?? item.url}
+                            alt={item.title ?? t("portfolio.altDefault")}
+                            loading="lazy"
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        )}
+                      </button>
+                    </ScrollReveal>
                   ))}
                 </div>
               </div>
-              <div className="mt-10 flex justify-center">
+              <ScrollReveal className="mt-10 flex justify-center" delay={200}>
                 <Button asChild variant="outline">
                   <Link to="/gallery">{t("portfolio.viewMore")}{"\u00a0"}<ArrowRight className="ml-1 h-4 w-4" /></Link>
                 </Button>
-              </div>
+              </ScrollReveal>
             </div>
           </section>
         )}
@@ -167,30 +172,36 @@ function ServicePage() {
         {/* LEAD FORM */}
         <section id="lead-form" className="section-y bg-secondary scroll-mt-20">
           <div className="container-x grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
-            <div>
+            <ScrollReveal>
               <p className="text-xs uppercase tracking-[0.25em] text-accent font-semibold">{t("service.order.tag")}</p>
               <h2 className="mt-3 text-3xl md:text-4xl">{t("service.order.title")}</h2>
               <p className="mt-3 text-muted-foreground">{t("service.order.text")}</p>
-            </div>
-            <LeadForm />
+            </ScrollReveal>
+            <ScrollReveal delay={200} animation="reveal-in">
+              <LeadForm />
+            </ScrollReveal>
           </div>
         </section>
 
         {/* OTHER SERVICES */}
         <section className="section-y bg-background">
           <div className="container-x">
-            <h2 className="text-2xl md:text-3xl">{t("service.others")}</h2>
+            <ScrollReveal>
+              <h2 className="text-2xl md:text-3xl">{t("service.others")}</h2>
+            </ScrollReveal>
             <ul className="mt-8 space-y-4 text-lg">
-              {others.map((o) => (
-                <li key={o.slug}>
-                  <Link
-                    to="/services/$slug"
-                    params={{ slug: o.slug }}
-                    className="inline-flex items-center gap-2 text-accent underline underline-offset-4 decoration-accent/40 hover:decoration-accent transition-colors"
-                  >
-                    {o.shortTitle}
-                  </Link>
-                </li>
+              {others.map((o, idx) => (
+                <ScrollReveal key={o.slug} delay={idx * 100}>
+                  <li>
+                    <Link
+                      to="/services/$slug"
+                      params={{ slug: o.slug }}
+                      className="inline-flex items-center gap-2 text-accent underline underline-offset-4 decoration-accent/40 hover:decoration-accent transition-colors"
+                    >
+                      {o.shortTitle}
+                    </Link>
+                  </li>
+                </ScrollReveal>
               ))}
             </ul>
           </div>

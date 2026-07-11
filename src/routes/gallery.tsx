@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Lightbox } from "@/components/Lightbox";
 import { useLanguage } from "@/i18n/context";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 
 
@@ -129,7 +130,7 @@ function JustifiedGallery({ items, onOpen }: { items: Item[]; onOpen: (id: strin
                 key={it.id}
                 onClick={() => onOpen(it.id)}
                 style={{ width: w, height: row.height }}
-                className="relative overflow-hidden bg-neutral-900 ring-1 ring-white/5 hover:ring-accent/60 transition shrink-0 cursor-zoom-in group"
+                className="relative overflow-hidden bg-secondary ring-1 ring-border/40 hover:ring-accent/60 transition shrink-0 cursor-zoom-in group rounded-lg"
               >
                 {it.type === "video" ? (
                   <video
@@ -190,54 +191,58 @@ function GalleryPage() {
   const uncatCount = list.filter((i) => !i.category_id).length;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0a0a0a] text-white">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <SiteHeader phone={c.phone} />
-      <section className="bg-[#0a0a0a]">
+      <section>
         <div className="container-x pt-16 pb-8">
-
-          <h1 className="mt-3 text-5xl md:text-6xl text-white">{t("gallery.title")}</h1>
-          <p className="mt-3 text-white/60 max-w-xl">{t("gallery.subtitle")}</p>
+          <ScrollReveal>
+            <h1 className="mt-3 text-5xl md:text-6xl text-foreground font-display uppercase tracking-wider">{t("gallery.title")}</h1>
+            <p className="mt-3 text-muted-foreground max-w-xl text-lg">{t("gallery.subtitle")}</p>
+          </ScrollReveal>
 
           {categories.length > 0 && (
-            <div className="mt-8 flex flex-wrap gap-2">
-              <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")}>
-                {t("gallery.all")} ({list.length})
-              </CatChip>
-              {categories.map((cat) => {
-                const n = list.filter((i) => i.category_id === cat.id).length;
-                if (n === 0) return null;
-                return (
-                  <CatChip key={cat.id} active={activeCat === cat.id} onClick={() => setActiveCat(cat.id)}>
-                    {cat.name} ({n})
-                  </CatChip>
-                );
-              })}
-              {uncatCount > 0 && (
-                <CatChip active={activeCat === "__none__"} onClick={() => setActiveCat("__none__")}>
-                  {t("gallery.other")} ({uncatCount})
+            <ScrollReveal delay={100}>
+              <div className="mt-8 flex flex-wrap gap-2">
+                <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")}>
+                  {t("gallery.all")} ({list.length})
                 </CatChip>
-              )}
-            </div>
+                {categories.map((cat) => {
+                  const n = list.filter((i) => i.category_id === cat.id).length;
+                  if (n === 0) return null;
+                  return (
+                    <CatChip key={cat.id} active={activeCat === cat.id} onClick={() => setActiveCat(cat.id)}>
+                      {cat.name} ({n})
+                    </CatChip>
+                  );
+                })}
+                {uncatCount > 0 && (
+                  <CatChip active={activeCat === "__none__"} onClick={() => setActiveCat("__none__")}>
+                    {t("gallery.other")} ({uncatCount})
+                  </CatChip>
+                )}
+              </div>
+            </ScrollReveal>
           )}
         </div>
       </section>
 
-      <section className="flex-1 bg-[#0a0a0a]">
+      <section className="flex-1">
         <div className="container-x pb-20">
           {filtered.length === 0 ? (
-            <div className="py-20 text-center text-white/50">
-              {list.length === 0 ? t("gallery.empty.all") : t("gallery.empty.cat")}
-            </div>
+            <ScrollReveal>
+              <div className="py-20 text-center text-muted-foreground">
+                {list.length === 0 ? t("gallery.empty.all") : t("gallery.empty.cat")}
+              </div>
+            </ScrollReveal>
           ) : (
-            <JustifiedGallery items={filtered} onOpen={setOpenId} />
+            <ScrollReveal delay={200}>
+              <JustifiedGallery items={filtered} onOpen={setOpenId} />
+            </ScrollReveal>
           )}
         </div>
       </section>
 
-
-      <div className="bg-background text-foreground">
-        <SiteFooter phone={c.phone} email={c.email} />
-      </div>
+      <SiteFooter phone={c.phone} email={c.email} />
 
       {openIndex >= 0 && (
         <Lightbox
@@ -259,7 +264,7 @@ function CatChip({ active, onClick, children }: { active: boolean; onClick: () =
       className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
         active
           ? "bg-accent text-accent-foreground border-accent"
-          : "border-white/15 text-white/80 hover:border-white/40 hover:text-white"
+          : "border-border text-muted-foreground hover:border-accent hover:text-accent"
       }`}
     >
       {children}

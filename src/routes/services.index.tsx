@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getServices } from "@/i18n/services";
 import { useLanguage } from "@/i18n/context";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 export const Route = createFileRoute("/services/")({
   head: () => ({
@@ -28,23 +29,27 @@ function ServicesIndex() {
       <main className="flex-1">
         <section className="section-y">
           <div className="container-x max-w-3xl">
-            <p className="text-xs uppercase tracking-[0.25em] text-accent font-semibold">{t("servicesIndex.tag")}</p>
-            <h1 className="mt-3 text-4xl md:text-5xl">{t("servicesIndex.title")}</h1>
-            <p className="mt-4 text-muted-foreground">
-              {t("servicesIndex.text")}
-            </p>
+            <ScrollReveal>
+              <p className="text-xs uppercase tracking-[0.25em] text-accent font-semibold">{t("servicesIndex.tag")}</p>
+              <h1 className="mt-3 text-4xl md:text-5xl">{t("servicesIndex.title")}</h1>
+              <p className="mt-4 text-muted-foreground">
+                {t("servicesIndex.text")}
+              </p>
+            </ScrollReveal>
 
             <ul className="mt-10 space-y-4 text-lg">
-              {services.map((s) => (
-                <li key={s.slug}>
-                  <Link
-                    to="/services/$slug"
-                    params={{ slug: s.slug }}
-                    className="inline-flex items-center gap-2 text-accent underline underline-offset-4 decoration-accent/40 hover:decoration-accent transition-colors"
-                  >
-                    {s.shortTitle}
-                  </Link>
-                </li>
+              {services.map((s, i) => (
+                <ScrollReveal key={s.slug} delay={i * 100}>
+                  <li>
+                    <Link
+                      to="/services/$slug"
+                      params={{ slug: s.slug }}
+                      className="inline-flex items-center gap-2 text-accent underline underline-offset-4 decoration-accent/40 hover:decoration-accent transition-colors"
+                    >
+                      {s.shortTitle}
+                    </Link>
+                  </li>
+                </ScrollReveal>
               ))}
             </ul>
           </div>

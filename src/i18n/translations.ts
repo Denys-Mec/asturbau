@@ -36,9 +36,9 @@ export const translations = {
     "services.more": "Ver más",
     "services.all": "Todos los servicios",
 
-    // Process
     "process.tag": "Proceso",
     "process.title": "Cómo trabajamos",
+    "process.intro": "Hemos desarrollado un proceso de trabajo estructurado en fases para garantizar la máxima eficiencia, transparencia y calidad en la reforma de su vivienda. Desde el primer contacto hasta la entrega de llaves, le acompañamos en cada paso.",
 
     // Portfolio (home)
     "portfolio.tag": "Portafolio",
@@ -104,6 +104,10 @@ export const translations = {
     "contacts.whoText": "Propietarios de pisos y casas, inversores inmobiliarios, propietarios de apartamentos turísticos, clientes empresariales, promotores y constructoras.",
     "contacts.formTitle": "Enviar solicitud",
     "contacts.formSub": "Responderemos en menos de una hora en horario laboral.",
+    "contacts.infoTag": "GET IN TOUCH",
+    "contacts.infoTitle": "Estamos listos para responder a sus preguntas y asesorarle",
+    "contacts.infoDesc": "Póngase en contacto con nosotros por teléfono, correo electrónico o a través del formulario. Evaluaremos su proyecto y realizaremos un presupuesto detallado sin compromiso.",
+    "contacts.socialTag": "Redes sociales",
 
     // Gallery page
     "gallery.title": "Nuestros trabajos",
@@ -203,6 +207,7 @@ export const translations = {
 
     "process.tag": "Процес",
     "process.title": "Як ми працюємо",
+    "process.intro": "Ми розробили структурований покроковий процес роботи, щоб забезпечити максимальну ефективність, прозорість та якість на кожному етапі ремонту вашого житла. Супроводжуємо вас від першої консультації до здачі готового об'єкта.",
 
     "portfolio.tag": "Портфоліо",
     "portfolio.title": "Наші роботи",
@@ -262,6 +267,10 @@ export const translations = {
     "contacts.whoText": "Власники квартир і будинків, інвестори в нерухомість, власники туристичних апартаментів, бізнес-клієнти, девелопери та забудовники.",
     "contacts.formTitle": "Залиште заявку",
     "contacts.formSub": "Відповімо протягом години у робочий час.",
+    "contacts.infoTag": "НА ЗВ'ЯЗКУ",
+    "contacts.infoTitle": "Ми завжди готові відповісти на ваші запитання та допомогти",
+    "contacts.infoDesc": "Зв'яжіться з нами по телефону, поштою чи заповніть форму. Ми детально проконсультуємо вас, обговоримо деталі проекту та складемо кошторис без зобов'язань.",
+    "contacts.socialTag": "Соціальні мережі",
 
     "gallery.title": "Наші роботи",
     "gallery.subtitle": "Реальні обʼєкти, виконані нашою командою.",

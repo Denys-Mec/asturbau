@@ -22,13 +22,13 @@ export function SiteHeader({ phone = "+34 643 329 216" }: { phone?: string }) {
   ] as const;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-md shadow-sm">
       <div className="container-x flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-foreground">
           <div className="h-9 w-9 grid place-items-center bg-foreground text-background font-display text-lg">A</div>
           <div className="leading-tight">
             <div className="font-display text-lg tracking-wide text-foreground">ASTURBAU</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{t("brand.tagline")}</div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{t("brand.tagline")}</div>
           </div>
         </Link>
 
@@ -67,44 +67,53 @@ export function SiteHeader({ phone = "+34 643 329 216" }: { phone?: string }) {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <a href={`tel:${phone.replace(/\s/g, "")}`} className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <a href={`tel:${phone.replace(/\s/g, "")}`} className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-accent transition-colors">
             <Phone className="h-4 w-4 text-accent" /> {phone}
           </a>
         </div>
 
         <div className="flex items-center md:hidden">
-          <button onClick={() => setOpen((v) => !v)} aria-label={t("nav.menu")}>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-label={t("nav.menu")}
+            className="text-foreground hover:text-accent p-2 transition-colors focus:outline-none"
+          >
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-border bg-background">
-          <div className="container-x py-4 flex flex-col gap-3">
+        <div className="md:hidden border-t border-border bg-background shadow-lg absolute left-0 right-0 top-16 max-h-[calc(100vh-4rem)] overflow-y-auto z-50">
+          <div className="container-x py-6 flex flex-col gap-4">
             {NAV.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 onClick={() => setOpen(false)}
-                className="py-2 text-base font-medium"
+                className="py-2 text-base font-medium text-foreground hover:text-accent transition-colors border-b border-border/40"
+                activeProps={{ className: "text-accent border-accent/40" }}
               >{item.label}</Link>
             ))}
             <div className="py-2">
-              <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2">{t("nav.services")}</div>
-              <div className="flex flex-col gap-2 pl-2">
+              <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-3 font-semibold">{t("nav.services")}</div>
+              <div className="flex flex-col gap-3 pl-2 border-l border-border/60">
                 {services.map((s) => (
                   <Link
                     key={s.slug}
                     to="/services/$slug"
                     params={{ slug: s.slug }}
                     onClick={() => setOpen(false)}
-                    className="text-sm text-foreground/80"
+                    className="text-sm text-foreground/80 hover:text-accent transition-colors py-1"
                   >{s.shortTitle}</Link>
                 ))}
               </div>
             </div>
-            <a href={`tel:${phone.replace(/\s/g, "")}`} className="py-2 text-base font-medium text-accent">{phone}</a>
+            <div className="pt-4 border-t border-border mt-2">
+              <a href={`tel:${phone.replace(/\s/g, "")}`} className="flex items-center gap-2 py-2 text-base font-medium text-accent hover:text-accent/80 transition-colors">
+                <Phone className="h-4 w-4" /> {phone}
+              </a>
+            </div>
           </div>
         </div>
       )}
