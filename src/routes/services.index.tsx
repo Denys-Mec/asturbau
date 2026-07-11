@@ -1,17 +1,20 @@
 import { createFileRoute, ErrorComponent, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getServices } from "@/i18n/services";
 import { useLanguage } from "@/i18n/context";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { siteContentQuery } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/services/")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(siteContentQuery),
   head: () => ({
     meta: [
       { title: "Nuestros servicios — Asturbau Construcción" },
       { name: "description", content: "Lista completa de servicios de Asturbau Construcción: reformas de pisos, casas, oficinas, locales comerciales, proyectos de diseño y trabajos de ingeniería en Asturias." },
       { property: "og:title", content: "Nuestros servicios — Asturbau Construcción" },
-      { property: "og:description", content: "Lista completa de áreas de trabajo de Asturbau Construcción en Asturias." },
+      { property: "og:description", content: "Lista completa de áreas de trabalho de Asturbau Construcción en Asturias." },
       { property: "og:type", content: "website" },
     ],
     links: [{ rel: "canonical", href: "/services" }],

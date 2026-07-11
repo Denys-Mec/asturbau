@@ -29,7 +29,7 @@ type RawService = {
   uk: LocalizedFields;
 };
 
-const RAW: RawService[] = [
+export const RAW: RawService[] = [
   {
     slug: "remont-pid-kliuch",
     image: collageLiving,
@@ -260,23 +260,33 @@ const RAW: RawService[] = [
   },
 ];
 
+let dynamicServices: RawService[] | null = null;
+
+export function setDynamicServices(services: RawService[]) {
+  dynamicServices = services;
+}
+
 function toService(raw: RawService, lang: Lang): ServiceDef {
   const l = raw[lang] ?? raw.es;
   return { slug: raw.slug, image: raw.image, ...l };
 }
 
 export function getServices(lang: Lang): ServiceDef[] {
-  return RAW.map((r) => toService(r, lang));
+  const list = dynamicServices || RAW;
+  return list.map((r) => toService(r, lang));
 }
 
 export function getServiceBySlug(slug: string, lang: Lang): ServiceDef | undefined {
-  const raw = RAW.find((r) => r.slug === slug);
+  const list = dynamicServices || RAW;
+  const raw = list.find((r) => r.slug === slug);
   return raw ? toService(raw, lang) : undefined;
 }
 
 // Slug list used by loaders (language-independent).
-export const SERVICE_SLUGS = RAW.map((r) => r.slug);
+export const SERVICE_SLUGS = (dynamicServices || RAW).map((r) => r.slug);
 
 export function serviceExists(slug: string) {
-  return RAW.some((r) => r.slug === slug);
+  const list = dynamicServices || RAW;
+  return list.some((r) => r.slug === slug);
 }
+

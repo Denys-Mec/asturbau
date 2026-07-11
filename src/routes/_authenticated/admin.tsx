@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { checkIsAdmin } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, FileText, Phone, Images, Inbox, Home, Bell } from "lucide-react";
+import { LogOut, FileText, Phone, Images, Inbox, Home, Bell, Briefcase, MessageSquare } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminLayout,
@@ -50,10 +50,11 @@ function AdminLayout() {
             <nav className="hidden md:flex items-center gap-1">
               <AdminLink to="/admin" icon={<Inbox className="h-4 w-4" />}>Заявки</AdminLink>
               <AdminLink to="/admin/content" icon={<FileText className="h-4 w-4" />}>Головна</AdminLink>
+              <AdminLink to="/admin/services" icon={<Briefcase className="h-4 w-4" />}>Послуги</AdminLink>
               <AdminLink to="/admin/contacts" icon={<Phone className="h-4 w-4" />}>Контакти</AdminLink>
+              <AdminLink to="/admin/testimonials" icon={<MessageSquare className="h-4 w-4" />}>Відгуки</AdminLink>
               <AdminLink to="/admin/gallery" icon={<Images className="h-4 w-4" />}>Галерея</AdminLink>
               <AdminLink to="/admin/notifications" icon={<Bell className="h-4 w-4" />}>Сповіщення</AdminLink>
-
             </nav>
           </div>
           <div className="flex items-center gap-2">
@@ -64,10 +65,11 @@ function AdminLayout() {
         <nav className="md:hidden border-t border-border container-x py-2 flex gap-1 overflow-x-auto">
           <AdminLink to="/admin">Заявки</AdminLink>
           <AdminLink to="/admin/content">Головна</AdminLink>
+          <AdminLink to="/admin/services">Послуги</AdminLink>
           <AdminLink to="/admin/contacts">Контакти</AdminLink>
+          <AdminLink to="/admin/testimonials">Відгуки</AdminLink>
           <AdminLink to="/admin/gallery">Галерея</AdminLink>
           <AdminLink to="/admin/notifications">Сповіщення</AdminLink>
-
         </nav>
       </header>
       <main className="container-x py-8">

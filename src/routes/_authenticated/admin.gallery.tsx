@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState, useRef, useEffect } from "react";
 import {
   adminListGallery, createGalleryItem, deleteGalleryItem, updateGalleryItem, createUploadUrl,
-  adminListCategories, createCategory, updateCategory, deleteCategory,
+  adminListCategories, createCategory, updateCategory, deleteCategory, getStorageUsage,
 } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -17,12 +17,28 @@ import { Trash2, Upload, Link as LinkIcon, ArrowUp, ArrowDown, Star, Plus, Play,
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SERVICES } from "@/lib/services-data";
+import { getYouTubeEmbedUrl } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/admin/gallery")({
   component: GalleryAdmin,
 });
 
 const NO_CATEGORY = "__none__";
+
+const storageUsageQuery = queryOptions({
+  queryKey: ["storage_usage"],
+  queryFn: () => getStorageUsage(),
+  staleTime: 30_000,
+});
+
+function formatBytes(bytes: number, decimals = 2) {
+  if (!bytes) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}
 
 function slugify(s: string) {
   return s
@@ -35,6 +51,70 @@ function slugify(s: string) {
     .slice(0, 80) || `cat-${Date.now()}`;
 }
 
+function compressImage(file: File, level: "none" | "low" | "high"): Promise<{ file: File; originalSize: number; compressedSize: number }> {
+  return new Promise((resolve) => {
+    const originalSize = file.size;
+    if (level === "none" || !file.type.startsWith("image/")) {
+      resolve({ file, originalSize, compressedSize: originalSize });
+      return;
+    }
+
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(img.src);
+      
+      const canvas = document.createElement("canvas");
+      let width = img.width;
+      let height = img.height;
+
+      const maxDim = level === "high" ? 1400 : 2200;
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve({ file, originalSize, compressedSize: originalSize });
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const quality = level === "high" ? 0.6 : 0.82;
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve({ file, originalSize, compressedSize: originalSize });
+            return;
+          }
+          const nameParts = file.name.split(".");
+          const ext = nameParts.length > 1 ? nameParts.pop() : "jpg";
+          const baseName = nameParts.join(".");
+          const compressedFile = new File([blob], `${baseName}_compressed.${ext}`, {
+            type: blob.type,
+            lastModified: Date.now()
+          });
+          resolve({ file: compressedFile, originalSize, compressedSize: compressedFile.size });
+        },
+        file.type === "image/png" ? "image/png" : "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = () => {
+      resolve({ file, originalSize, compressedSize: originalSize });
+    };
+  });
+}
+
 function GalleryAdmin() {
   const list = useServerFn(adminListGallery);
   const create = useServerFn(createGalleryItem);
@@ -42,6 +122,7 @@ function GalleryAdmin() {
   const del = useServerFn(deleteGalleryItem);
   const upload = useServerFn(createUploadUrl);
   const listCats = useServerFn(adminListCategories);
+  const { data: storageUsage } = useQuery(storageUsageQuery);
   const createCat = useServerFn(createCategory);
   const delCat = useServerFn(deleteCategory);
   const qc = useQueryClient();
@@ -55,6 +136,7 @@ function GalleryAdmin() {
   const [newCatName, setNewCatName] = useState("");
   const [defaultCat, setDefaultCat] = useState<string>(NO_CATEGORY);
   const [preview, setPreview] = useState<any | null>(null);
+  const [compressLevel, setCompressLevel] = useState<"none" | "low" | "high">("low");
 
   const { data: items = [] } = useQuery({ queryKey: ["admin_gallery"], queryFn: () => list() });
   const { data: categories = [] } = useQuery({ queryKey: ["admin_categories"], queryFn: () => listCats() });
@@ -62,6 +144,7 @@ function GalleryAdmin() {
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["admin_gallery"] });
     qc.invalidateQueries({ queryKey: ["gallery"] });
+    qc.invalidateQueries({ queryKey: ["storage_usage"] });
   };
   const refreshCats = () => {
     qc.invalidateQueries({ queryKey: ["admin_categories"] });
@@ -70,7 +153,7 @@ function GalleryAdmin() {
 
   const createMut = useMutation({
     mutationFn: (v: any) => create({ data: v }),
-    onSuccess: () => { refresh(); toast.success("Додано"); },
+    onSuccess: () => { refresh(); },
     onError: (e: any) => toast.error(e?.message || "Помилка"),
   });
   const updateMut = useMutation({
@@ -94,17 +177,23 @@ function GalleryAdmin() {
   async function handleFile(file: File) {
     setUploading(true);
     try {
-      const { path, token } = await upload({ data: { filename: file.name } });
-      const { error } = await supabase.storage.from("gallery").uploadToSignedUrl(path, token, file);
+      const { file: processedFile, originalSize, compressedSize } = await compressImage(file, compressLevel);
+      const { path, token } = await upload({ data: { filename: processedFile.name } });
+      const { error } = await supabase.storage.from("gallery").uploadToSignedUrl(path, token, processedFile);
       if (error) throw error;
       const url = `/api/public/gallery/${encodeURIComponent(path)}`;
-      const type = file.type.startsWith("video/") ? "video" : "image";
-      const orientation = await detectOrientation(file, type);
+      const type = processedFile.type.startsWith("video/") ? "video" : "image";
+      const orientation = await detectOrientation(processedFile, type);
       const maxOrder = items.reduce((m: number, i: any) => Math.max(m, i.sort_order), 0);
       await createMut.mutateAsync({
         type, url, orientation, sort_order: maxOrder + 1, title: file.name,
         category_id: defaultCat === NO_CATEGORY ? null : defaultCat,
       });
+      if (compressedSize < originalSize) {
+        toast.success(`Додано! Стиснуто: ${formatBytes(originalSize)} → ${formatBytes(compressedSize)} (-${Math.round((1 - compressedSize / originalSize) * 100)}%)`);
+      } else {
+        toast.success(`Додано: ${formatBytes(originalSize)}`);
+      }
     } catch (e: any) {
       toast.error(e?.message || "Помилка завантаження");
     } finally {
@@ -140,6 +229,8 @@ function GalleryAdmin() {
       type: urlForm.type, url: urlForm.url, title: urlForm.title,
       orientation: urlForm.orientation, sort_order: maxOrder + 1,
       category_id: urlForm.category_id === NO_CATEGORY ? null : urlForm.category_id,
+    }, {
+      onSuccess: () => toast.success("Додано"),
     });
     setUrlForm({ ...urlForm, url: "", title: "" });
   }
@@ -203,18 +294,60 @@ function GalleryAdmin() {
           <Button variant={mode === "url" ? "default" : "outline"} size="sm" onClick={() => setMode("url")}><LinkIcon className="h-4 w-4 mr-1" />Додати за URL</Button>
         </div>
 
+        {storageUsage && (
+          <div className="mb-4 bg-secondary/30 border border-border/80 p-3.5 rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:justify-between text-xs font-medium text-muted-foreground mb-1.5 gap-1">
+              <span>Використано місця в хмарі (Supabase Storage):</span>
+              <span className="font-semibold text-foreground">
+                {formatBytes(storageUsage.usedBytes)} з {formatBytes(storageUsage.totalBytes)} ({((storageUsage.usedBytes / storageUsage.totalBytes) * 100).toFixed(1)}%)
+              </span>
+            </div>
+            <div className="h-2 bg-muted rounded overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 rounded-full ${
+                  (storageUsage.usedBytes / storageUsage.totalBytes) > 0.9
+                    ? "bg-destructive"
+                    : (storageUsage.usedBytes / storageUsage.totalBytes) > 0.75
+                    ? "bg-amber-500"
+                    : "bg-accent"
+                }`}
+                style={{ width: `${Math.min(100, (storageUsage.usedBytes / storageUsage.totalBytes) * 100)}%` }}
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Безкоштовний тариф Supabase включає 1 ГБ сховища. Відео краще завантажувати за посиланням на YouTube, щоб не переповнювати ліміт.
+            </p>
+          </div>
+        )}
+
         {mode === "upload" ? (
           <div>
-            <div className="mb-3 max-w-xs">
-              <Label>Категорія для нових файлів</Label>
-              <Select value={defaultCat} onValueChange={setDefaultCat}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NO_CATEGORY}>Без категорії</SelectItem>
-                  {categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            <div className="grid sm:grid-cols-2 gap-3 mb-4 max-w-xl">
+              <div>
+                <Label>Категорія для нових файлів</Label>
+                <Select value={defaultCat} onValueChange={setDefaultCat}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_CATEGORY}>Без категорії</SelectItem>
+                    {categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Стискання фото перед завантаженням</Label>
+                <Select value={compressLevel} onValueChange={(v: any) => setCompressLevel(v)}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Не стискати (100% якість)</SelectItem>
+                    <SelectItem value="low">Слабке стискання (Висока якість, ~82%)</SelectItem>
+                    <SelectItem value="high">Сильне стискання (Макс. оптимізація, ~60%)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+            <p className="text-[11px] text-muted-foreground -mt-3 mb-3">
+              * Стискання діє тільки для зображень. Відеофайли завантажуються в оригінальному розмірі.
+            </p>
             <div
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
@@ -330,10 +463,30 @@ function GalleryAdmin() {
                   <Star className="h-3 w-3 fill-current" />
                 </div>
               )}
+              <span className={`absolute top-2 right-2 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded shadow backdrop-blur-sm z-10 ${
+                it.url.includes("/api/public/gallery/") 
+                  ? "bg-blue-600/85 border border-blue-500/30" 
+                  : "bg-emerald-600/85 border border-emerald-500/30"
+              }`}>
+                {it.url.includes("/api/public/gallery/") ? "Файл" : "Посилання"}
+              </span>
             </button>
             <div className="p-2 flex-1 flex flex-col gap-2">
               <div className="text-xs truncate" title={it.title}>{it.title || "—"}</div>
-              <div className="text-[10px] uppercase text-muted-foreground">{it.type} · {it.orientation}</div>
+              <div className="text-[10px] uppercase text-muted-foreground flex items-center justify-between gap-1 flex-wrap">
+                <span>{it.type} · {it.orientation}</span>
+                {(() => {
+                  const prefix = "/api/public/gallery/";
+                  if (it.url.startsWith(prefix)) {
+                    const filename = decodeURIComponent(it.url.substring(prefix.length));
+                    const size = storageUsage?.fileSizes?.[filename];
+                    if (size) {
+                      return <span className="font-semibold text-foreground normal-case bg-secondary/80 px-1 rounded">{formatBytes(size)}</span>;
+                    }
+                  }
+                  return null;
+                })()}
+              </div>
 
               <div>
                 <Label className="text-[10px] uppercase text-muted-foreground">Категорія</Label>
@@ -376,9 +529,20 @@ function GalleryAdmin() {
         <DialogContent className="max-w-4xl p-2 bg-black border-border">
           <DialogTitle className="sr-only">{preview?.title || "Перегляд"}</DialogTitle>
           {preview && (
-            preview.type === "video"
-              ? <video src={preview.url} controls autoPlay playsInline className="w-full max-h-[80vh] object-contain bg-black" />
-              : <img src={preview.url} alt={preview.title || ""} className="w-full max-h-[80vh] object-contain bg-black" />
+            preview.type === "video" ? (
+              getYouTubeEmbedUrl(preview.url) ? (
+                <iframe
+                  src={getYouTubeEmbedUrl(preview.url)!}
+                  className="w-full aspect-video max-h-[80vh] rounded-lg border-0 bg-black"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : (
+                <video src={preview.url} controls autoPlay playsInline className="w-full max-h-[80vh] object-contain bg-black" />
+              )
+            ) : (
+              <img src={preview.url} alt={preview.title || ""} className="w-full max-h-[80vh] object-contain bg-black" />
+            )
           )}
         </DialogContent>
       </Dialog>
@@ -429,37 +593,22 @@ async function detectOrientation(file: File, type: "image" | "video"): Promise<"
 }
 
 function VideoThumb({ src }: { src: string }) {
-  const [poster, setPoster] = useState<string | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    const v = document.createElement("video");
-    v.muted = true;
-    v.playsInline = true;
-    v.preload = "metadata";
-    v.src = src;
-    const capture = () => {
-      try {
-        const c = document.createElement("canvas");
-        c.width = v.videoWidth || 320;
-        c.height = v.videoHeight || 240;
-        const ctx = c.getContext("2d");
-        if (!ctx) return;
-        ctx.drawImage(v, 0, 0, c.width, c.height);
-        if (!cancelled) setPoster(c.toDataURL("image/jpeg", 0.7));
-      } catch {
-        /* ignore */
-      }
-    };
-    const onLoaded = () => {
-      try { v.currentTime = Math.min(0.1, (v.duration || 1) / 2); } catch { capture(); }
-    };
-    v.addEventListener("loadeddata", onLoaded);
-    v.addEventListener("seeked", capture);
-    return () => { cancelled = true; v.removeEventListener("loadeddata", onLoaded); v.removeEventListener("seeked", capture); v.src = ""; };
-  }, [src]);
-  return poster
-    ? <img src={poster} alt="" className="w-full h-full object-cover" />
-    : <div className="w-full h-full bg-muted grid place-items-center text-[10px] text-muted-foreground">video</div>;
+  const ytUrl = getYouTubeEmbedUrl(src);
+  if (ytUrl) {
+    const match = src.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/);
+    const ytId = match && match[2].length === 11 ? match[2] : "";
+    return <img src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} alt="" className="w-full h-full object-cover" />;
+  }
+
+  return (
+    <video
+      src={`${src}#t=0.5`}
+      muted
+      playsInline
+      preload="metadata"
+      className="w-full h-full object-cover block pointer-events-none"
+    />
+  );
 }
 
 function normalizePages(it: any): string[] {

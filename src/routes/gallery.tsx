@@ -1,12 +1,13 @@
 import { createFileRoute, ErrorComponent } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getGallery, getGalleryCategories, getSiteContent } from "@/lib/content.functions";
+import { getGallery, getGalleryCategories, siteContentQuery } from "@/lib/content.functions";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Lightbox } from "@/components/Lightbox";
 import { useLanguage } from "@/i18n/context";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { getYouTubeEmbedUrl } from "@/lib/utils";
 
 
 
@@ -20,18 +21,13 @@ const categoriesQuery = queryOptions({
   queryFn: () => getGalleryCategories(),
   staleTime: 60_000,
 });
-const contentQuery = queryOptions({
-  queryKey: ["site_content"],
-  queryFn: () => getSiteContent(),
-  staleTime: 60_000,
-});
 
 export const Route = createFileRoute("/gallery")({
   loader: async ({ context }) => {
     await Promise.all([
       context.queryClient.ensureQueryData(galleryQuery),
       context.queryClient.ensureQueryData(categoriesQuery),
-      context.queryClient.ensureQueryData(contentQuery),
+      context.queryClient.ensureQueryData(siteContentQuery),
     ]);
   },
   head: () => ({
@@ -133,18 +129,30 @@ function JustifiedGallery({ items, onOpen }: { items: Item[]; onOpen: (id: strin
                 className="relative overflow-hidden bg-secondary ring-1 ring-border/40 hover:ring-accent/60 transition shrink-0 cursor-zoom-in group rounded-lg"
               >
                 {it.type === "video" ? (
-                  <video
-                    src={it.thumbnail_url ? it.url : `${it.url}#t=0.5`}
-                    poster={it.thumbnail_url ?? undefined}
-                    muted
-                    playsInline
-                    preload="metadata"
-                    onLoadedMetadata={(e) => {
-                      const v = e.currentTarget;
-                      if (v.videoWidth && v.videoHeight) setRatio(it.id, v.videoWidth / v.videoHeight);
-                    }}
-                    className="w-full h-full object-cover block pointer-events-none"
-                  />
+                  getYouTubeEmbedUrl(it.url) ? (
+                    <img
+                      src={it.thumbnail_url || `https://img.youtube.com/vi/${it.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/)?.[2] || ""}/hqdefault.jpg`}
+                      alt={it.title || "Asturbau project video"}
+                      loading="lazy"
+                      onLoad={() => {
+                        setRatio(it.id, 16 / 9);
+                      }}
+                      className="w-full h-full object-cover block"
+                    />
+                  ) : (
+                    <video
+                      src={it.thumbnail_url ? it.url : `${it.url}#t=0.5`}
+                      poster={it.thumbnail_url ?? undefined}
+                      muted
+                      playsInline
+                      preload="metadata"
+                      onLoadedMetadata={(e) => {
+                        const v = e.currentTarget;
+                        if (v.videoWidth && v.videoHeight) setRatio(it.id, v.videoWidth / v.videoHeight);
+                      }}
+                      className="w-full h-full object-cover block pointer-events-none"
+                    />
+                  )
                 ) : (
                   <img
                     src={it.url}
@@ -173,7 +181,7 @@ function JustifiedGallery({ items, onOpen }: { items: Item[]; onOpen: (id: strin
 function GalleryPage() {
   const { data: items } = useSuspenseQuery(galleryQuery);
   const { data: cats } = useSuspenseQuery(categoriesQuery);
-  const { data: content } = useSuspenseQuery(contentQuery);
+  const { data: content } = useSuspenseQuery(siteContentQuery);
   const { t } = useLanguage();
   const c = content.contacts ?? {};
   const list = items as Item[];

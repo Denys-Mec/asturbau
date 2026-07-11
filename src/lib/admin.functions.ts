@@ -130,6 +130,32 @@ export const deleteGalleryItem = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const getStorageUsage = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: files, error } = await supabaseAdmin.storage.from("gallery").list("", {
+      limit: 1000,
+    });
+    if (error) throw error;
+    let totalBytes = 0;
+    const fileSizes: Record<string, number> = {};
+    if (files) {
+      for (const file of files) {
+        if (file.metadata?.size) {
+          totalBytes += file.metadata.size;
+          fileSizes[file.name] = file.metadata.size;
+        }
+      }
+    }
+    return {
+      usedBytes: totalBytes,
+      totalBytes: 1024 * 1024 * 1024, // 1 GB free tier limit
+      fileSizes
+    };
+  });
+
 // Signed upload URL so admin can upload directly to storage
 export const createUploadUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

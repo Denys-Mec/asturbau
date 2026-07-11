@@ -3,6 +3,9 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 
+import { queryOptions } from "@tanstack/react-query";
+import { setDynamicServices } from "@/i18n/services";
+
 function publicClient() {
   return createClient<Database>(
     process.env.SUPABASE_URL!,
@@ -17,7 +20,19 @@ export const getSiteContent = createServerFn({ method: "GET" }).handler(async ()
   if (error) throw error;
   const map: Record<string, any> = {};
   for (const row of data ?? []) map[row.key] = row.value;
-  return map as { home?: any; contacts?: any };
+  return map as { home?: any; contacts?: any; services?: any };
+});
+
+export const siteContentQuery = queryOptions({
+  queryKey: ["site_content"],
+  queryFn: async () => {
+    const res = await getSiteContent();
+    if (res.services) {
+      setDynamicServices(res.services);
+    }
+    return res;
+  },
+  staleTime: 60_000,
 });
 
 export const getGallery = createServerFn({ method: "GET" }).handler(async () => {

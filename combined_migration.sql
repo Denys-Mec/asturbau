@@ -201,42 +201,66 @@ USING (bucket_id = 'gallery' AND EXISTS (SELECT 1 FROM public.user_roles WHERE u
 -- 8. Seed default content safely
 INSERT INTO public.site_content (key, value) VALUES
 ('home', '{
-  "hero_title": "Asturbau Construcción",
-  "hero_subtitle": "Професійний ремонт квартир, офісів та комерційних приміщень під ключ в Астурії (Хіхон, Ов\u0027єдо, Авілес)",
-  "hero_cta": "Залишити заявку",
-  "about_title": "Наші переваги",
-  "about_text": "У сфері ремонту та оздоблення житла і комерційної нерухомості якість робіт та чітке дотримання технологій є найважливішими чинниками. Компанія Asturbau пропонує професійний ремонт під ключ у Хіхоні, Ов\u0027єдо та Авілесі. Ми не просто виконуємо технічне завдання, а створюємо ергономічний, безпечний та довговічний простір для життя та бізнесу на основі детальних розрахунків та перевірених технологій.",
-  "advantages": [
-    "Багаторічний практичний досвід у сфері ремонту та оздоблення",
-    "Виконання робіт «під ключ»",
-    "Високі стандарти якості на кожному етапі",
-    "Прозорість кошторису та вартості робіт",
-    "Дотримання узгоджених термінів",
-    "Постійний звʼязок із замовником",
-    "Індивідуальний підхід до кожного проєкту",
-    "Робота як з приватними, так і з комерційними обʼєктами",
-    "Використання сучасних технологій та матеріалів",
-    "Контроль якості на всіх етапах виконання"
-  ],
-  "services": [
-    {"title":"Комплексний ремонт","desc":"Професійний ремонт квартир та приватних будинків під ключ у Хіхоні, Ов\u0027єдо, Авілесі та по всій Астурії. Повний цикл робіт від перепланування до фінішного оздоблення й гарантії."},
-    {"title":"Ремонт офісів та комерції","desc":"Якісний ремонт офісів, магазинів, ресторанів та комерційних приміщень в Астурії. Встановлення вентиляції, комерційного освітлення та гнучкий графік робіт (нічні зміни)."},
-    {"title":"Планування приміщень","desc":"Технічні послуги з планування та перепланування квартир і комерційних площ. Розробка оптимальних планувальних рішень, схем перегородок та розташування меблів."},
-    {"title":"Монтаж інженерних мереж","desc":"Проєктуємо та монтуємо інженерні комунікації будь-якої складності: електромонтаж, колекторна розводка водопостачання та автономне енергоефективне опалення."},
-    {"title":"Гіпсокартонні роботи","desc":"Професійний монтаж гіпсокартонних конструкцій будь-якої складності в Астурії. Будуємо міжкімнатні перегородки, підвісні стелі, декоративні ніші та звукоізоляційні фальшстіни з мінватою."},
-    {"title":"Ремонт ванних кімнат та плитка","desc":"Комплексний ремонт санвузлів та кухонь під ключ. Професійне укладання плитки та великоформатного керамограніту із запилом кутів під 45° та гідроізоляцією."}
-  ],
-  "process": [
-    {"step":"01","title":"Перший контакт","desc":"Обговорюємо ваші потреби та задачі"},
-    {"step":"02","title":"Виїзд на обʼєкт","desc":"Приїжджаємо на обʼєкт, робимо заміри й оцінюємо обсяг майбутніх робіт."},
-    {"step":"03","title":"Кошторис","desc":"Готуємо повний розрахунок вартості з деталізованим списком матеріалів, робіт і встановлюємо терміни виконання."},
-    {"step":"04","title":"Договір","desc":"Фіксуємо обсяг, терміни та ціну"},
-    {"step":"05","title":"Виконання","desc":"Робота згідно з графіком"},
-    {"step":"06","title":"Контроль","desc":"Контроль якості на всіх етапах"},
-    {"step":"07","title":"Здача обʼєкта","desc":"Приймання готового результату"}
-  ],
-  "values_title": "Наші цінності",
-  "values_text": "Компанія Asturbau — це команда кваліфікованих майстрів із понад 10-річним досвідом у сфері внутрішнього оздоблення та інженерних робіт в Астурії. Ми працюємо чесно, прозоро та відповідально: фіксуємо остаточну вартість робіт у договорі, використовуємо сертифіковані матеріали, що відповідають чинним нормативам, та забезпечуємо повну поетапну звітність перед замовником на кожній стадії оздоблювальних робіт."
+  "es": {
+    "hero_title": "Asturbau Construcción",
+    "hero_subtitle": "Reformas integrales y acabados en Asturias (Gijón, Oviedo, Avilés)",
+    "hero_cta": "Solicitar presupuesto gratis",
+    "about_title": "Nuestras ventajas",
+    "about_text": "En el sector de las reformas y acabados, la calidad del trabajo y el cumplimiento de los plazos son claves. Asturbau ofrece reformas integrales llave en mano en Gijón, Oviedo y Avilés. Creamos espacios ergonómicos, seguros y duraderos basándose en cálculos minuciosos y soluciones tecnológicas contrastadas.",
+    "advantages": [
+      "Años de experiencia práctica en reformas y acabados",
+      "Ejecución de proyectos llave en mano",
+      "Altos estándares de calidad en cada etapa",
+      "Presupuesto transparente y detallado",
+      "Cumplimiento estricto de los plazos acordados",
+      "Contacto y asesoramiento continuo con el cliente",
+      "Enfoque individualizado para cada proyecto",
+      "Trabajamos con propiedades residenciales y comerciales",
+      "Uso de tecnologías y materiales modernos",
+      "Control de calidad riguroso en todo momento"
+    ],
+    "process": [
+      {"step": "01", "title": "Primer contacto", "desc": "Analizamos sus necesidades, ideas y objetivos para el proyecto."},
+      {"step": "02", "title": "Visita técnica", "desc": "Visitamos el inmueble para realizar mediciones y evaluar el estado actual."},
+      {"step": "03", "title": "Presupuesto", "desc": "Elaboramos un cálculo de costes desglosado con materiales, mano de obra y plazos."},
+      {"step": "04", "title": "Firma del contrato", "desc": "Fijamos el alcance del trabajo, precio cerrado y fechas de entrega en el contrato."},
+      {"step": "05", "title": "Ejecución de obra", "desc": "Realizamos los trabajos según la planificación y normativas técnicas."},
+      {"step": "06", "title": "Control de calidad", "desc": "Supervisamos rigurosamente cada fase para asegurar acabados de nivel superior."},
+      {"step": "07", "title": "Entrega de llaves", "desc": "Recepción del proyecto terminado, limpieza final y entrega de garantías."}
+    ],
+    "values_title": "Nuestros valores",
+    "values_text": "Asturbau es un equipo de profesionales con más de 10 años de experiencia en reformas e instalaciones en Asturias. Trabajamos con honestidad, transparencia y responsabilidad: presupuesto cerrado por contrato, uso de materiales certificados y reporte continuo al cliente sobre el avance de los trabajos."
+  },
+  "uk": {
+    "hero_title": "Asturbau Construcción",
+    "hero_subtitle": "Професійний ремонт квартир, офісів та комерційних приміщень під ключ в Астурії (Хіхон, Ов\u0027єдо, Авілес)",
+    "hero_cta": "Залишити заявку",
+    "about_title": "Наші переваги",
+    "about_text": "У сфері ремонту та оздоблення житла і комерційної нерухомості якість робіт та чітке дотримання технологій є найважливішими чинниками. Компанія Asturbau пропонує професійний ремонт під ключ у Хіхоні, Ов\u0027єдо та Авілесі. Ми не просто виконуємо технічне завдання, а створюємо ергономічний, безпечний та довговічний простір для життя та бізнесу на основі детальних розрахунків та перевірених технологій.",
+    "advantages": [
+      "Багаторічний практичний досвід у сфері ремонту та оздоблення",
+      "Виконання робіт «під ключ»",
+      "Високі стандарти якості на кожному етапі",
+      "Прозорість кошторису та вартості робіт",
+      "Дотримання узгоджених термінів",
+      "Постійний звʼязок із замовником",
+      "Індивідуальний підхід до кожного проєкту",
+      "Робота як з приватними, так і з комерційними обʼєктами",
+      "Використання сучасних технологій та матеріалів",
+      "Контроль якості на всіх етапах виконання"
+    ],
+    "process": [
+      {"step": "01", "title": "Перший контакт", "desc": "Обговорюємо ваші потреби та задачі"},
+      {"step": "02", "title": "Виїзд на обʼєкт", "desc": "Приїжджаємо на обʼєкт, робимо заміри й оцінюємо обсяг майбутніх робіт."},
+      {"step": "03", "title": "Кошторис", "desc": "Готуємо повний розрахунок вартості з деталізованим списком матеріалів, робіт і встановлюємо терміни виконання."},
+      {"step": "04", "title": "Договір", "desc": "Фіксуємо обсяг, терміни та ціну"},
+      {"step": "05", "title": "Виконання", "desc": "Робота згідно з графіком"},
+      {"step": "06", "title": "Контроль", "desc": "Контроль якості на всіх етапах"},
+      {"step": "07", "title": "Здача обʼєкта", "desc": "Приймання готового результату"}
+    ],
+    "values_title": "Наші цінності",
+    "values_text": "Компанія Asturbau — це команда кваліфікованих майстрів із понад 10-річним досвідом у сфері внутрішнього оздоблення та інженерних робіт в Астурії. Ми працюємо чесно, прозоро та відповідально: фіксуємо остаточну вартість робіт у договорі, використовуємо сертифіковані матеріали, що відповідають чинним нормативам, та забезпечуємо повну поетапну звітність перед замовником на кожній стадії оздоблювальних робіт."
+  }
 }'::jsonb),
 ('contacts', '{
   "company": "Asturbau Construcción",

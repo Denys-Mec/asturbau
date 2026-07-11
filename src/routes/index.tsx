@@ -5,12 +5,14 @@ import { Lightbox } from "@/components/Lightbox";
 import {
   ArrowRight, Home, Building2, Layers, Flame, Hammer, Bath,
   Phone, Star, MessageCircle, Send,
+  Wrench, Paintbrush, Ruler, HardHat, Droplet, Lightbulb, Plug,
 } from "lucide-react";
-import { getSiteContent, getGallery } from "@/lib/content.functions";
+import { getGallery, siteContentQuery } from "@/lib/content.functions";
 import { getServices } from "@/i18n/services";
 import { useLanguage } from "@/i18n/context";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { getYouTubeEmbedUrl } from "@/lib/utils";
 import { LeadForm } from "@/components/LeadForm";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
@@ -24,8 +26,39 @@ import svcDrywall from "@/assets/svc-drywall.jpg";
 import svcRestaurant from "@/assets/svc-restaurant.jpg";
 import svcHeating from "@/assets/svc-heating.jpg";
 
-// Images matched to services in DB order
-const SERVICE_IMAGES = [svcApartment, svcRestaurant, svcDrywall, svcHeating];
+const SERVICE_IMAGES: Record<string, string> = {
+  "remont-pid-kliuch": collageLiving,
+  "remont-ofisiv-ta-komertsii": svcRestaurant,
+  "planuvannia-ta-pereplanuvannia": collageKitchen,
+  "inzhenerni-merezhi": svcHeating,
+  "montazh-gipsokartonu": svcDrywall,
+  "remont-vannykh-ta-plytka": collageBathroom
+};
+
+const PATH_MAP: Record<string, string> = {
+  "/src/assets/collage-living.jpg": collageLiving,
+  "/src/assets/svc-restaurant.jpg": svcRestaurant,
+  "/src/assets/collage-kitchen.jpg": collageKitchen,
+  "/src/assets/svc-heating.jpg": svcHeating,
+  "/src/assets/svc-drywall.jpg": svcDrywall,
+  "/src/assets/collage-bathroom.jpg": collageBathroom
+};
+
+const ICON_MAP: Record<string, any> = {
+  home: Home,
+  building: Building2,
+  layers: Layers,
+  flame: Flame,
+  hammer: Hammer,
+  bath: Bath,
+  wrench: Wrench,
+  paintbrush: Paintbrush,
+  ruler: Ruler,
+  hardhat: HardHat,
+  droplet: Droplet,
+  lightbulb: Lightbulb,
+  plug: Plug
+};
 
 function getInitials(name: string) {
   return name
@@ -36,11 +69,6 @@ function getInitials(name: string) {
     .join("");
 }
 
-const contentQuery = queryOptions({
-  queryKey: ["site_content"],
-  queryFn: () => getSiteContent(),
-  staleTime: 60_000,
-});
 const galleryQuery = queryOptions({
   queryKey: ["gallery"],
   queryFn: () => getGallery(),
@@ -50,7 +78,7 @@ const galleryQuery = queryOptions({
 export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
     await Promise.all([
-      context.queryClient.ensureQueryData(contentQuery),
+      context.queryClient.ensureQueryData(siteContentQuery),
       context.queryClient.ensureQueryData(galleryQuery),
     ]);
   },
@@ -81,19 +109,103 @@ const DEFAULT_TESTIMONIALS = [
 
 function HomePage() {
   const { lang, t } = useLanguage();
-  const { data } = useSuspenseQuery(contentQuery);
+  const { data } = useSuspenseQuery(siteContentQuery);
   const { data: gallery } = useSuspenseQuery(galleryQuery);
   const SERVICE_DEFS = getServices(lang);
-  const h = data.home ?? {};
+  
+  const h = (() => {
+    let resolved = (data.home?.[lang] ?? data.home?.es ?? data.home) ?? {};
+    
+    if (lang === "es") {
+      const needsEsFallback = !data.home?.es || resolved.about_title === "Наші переваги" || resolved.process?.some((p: any) => p.title === "Перший контакт");
+      if (needsEsFallback) {
+        resolved = {
+          ...resolved,
+          hero_title: resolved.hero_title || "Asturbau Construcción",
+          hero_subtitle: resolved.hero_subtitle === "Професійний ремонт квартир, офісів та комерційних приміщень під ключ в Астурії (Хіхон, Ов'єдо, Авілес)" || !resolved.hero_subtitle
+            ? "Reformas integrales y acabados en Asturias (Gijón, Oviedo, Avilés)"
+            : resolved.hero_subtitle,
+          hero_cta: resolved.hero_cta || "Solicitar presupuesto gratis",
+          about_title: "Nuestras ventajas",
+          about_text: "En el sector de las reformas y acabados, la calidad del trabajo y el cumplimiento de los plazos son claves. Asturbau ofrece reformas integrales llave en mano en Gijón, Oviedo y Avilés. Creamos espacios ergonómicos, seguros y duraderos basándonos en cálculos minuciosos y soluciones tecnológicas contrastadas.",
+          advantages: resolved.advantages?.some((a: string) => a.includes("Багаторічний")) || !resolved.advantages
+            ? [
+                "Años de experiencia práctica en reformas y acabados",
+                "Ejecución de proyectos llave en mano",
+                "Altos estándares de calidad en cada etapa",
+                "Presupuesto transparente y detallado",
+                "Cumplimiento de los plazos acordados",
+                "Contacto continuo con el cliente",
+                "Enfoque individualizado para cada proyecto",
+                "Trabajamos con propiedades residenciales y comerciales",
+                "Uso de tecnologías y materiales modernos",
+                "Control de calidad en todo momento"
+              ]
+            : resolved.advantages,
+          values_title: resolved.values_title === "Наші цінності" || !resolved.values_title ? "Nuestros valores" : resolved.values_title,
+          values_text: resolved.values_text?.includes("Компанія Asturbau") || !resolved.values_text
+            ? "Asturbau es un equipo de profesionales con más de 10 años de experiencia en reformas e instalaciones en Asturias. Trabajamos con honestidad, transparencia y responsabilidad: presupuesto cerrado por contrato, uso de materiales certificados y reporte continuo al cliente sobre el avance de los trabajos."
+            : resolved.values_text,
+          process: resolved.process?.some((p: any) => p.title === "Перший контакт") || !resolved.process
+            ? [
+                { step: "01", title: "Primer contacto", desc: "Analizamos sus necesidades, ideas y objetivos para el proyecto." },
+                { step: "02", title: "Visita técnica", desc: "Visitamos el inmueble para realizar mediciones y evaluar el estado actual." },
+                { step: "03", title: "Presupuesto", desc: "Elaboramos un cálculo de costes desglosado con materiales, mano de obra y plazos." },
+                { step: "04", title: "Firma del contrato", desc: "Fijamos el alcance del trabajo, precio cerrado y fechas de entrega en el contrato." },
+                { step: "05", title: "Ejecución de obra", desc: "Realizamos los trabajos según la planificación y normativas técnicas." },
+                { step: "06", title: "Control de calidad", desc: "Supervisamos rigurosamente cada fase para asegurar acabados de nivel superior." },
+                { step: "07", title: "Entrega de llaves", desc: "Recepción del proyecto terminado, limpieza final y entrega de garantías." }
+              ]
+            : resolved.process
+        };
+      }
+    } else {
+      const needsUkFallback = !data.home?.uk || !resolved.about_title;
+      if (needsUkFallback) {
+        resolved = {
+          ...resolved,
+          hero_title: resolved.hero_title || "Asturbau Construcción",
+          hero_subtitle: resolved.hero_subtitle || "Професійний ремонт квартир, офісів та комерційних приміщень під ключ в Астурії (Хіхон, Ов'єдо, Авілес)",
+          hero_cta: resolved.hero_cta || "Залишити заявку",
+          about_title: "Наші переваги",
+          about_text: resolved.about_text || "У сфері ремонту та оздоблення житла і комерційної нерухомості якість робіт та чітке дотримання технологій є найважливішими чинниками. Компанія Asturbau пропонує професійний ремонт під ключ у Хіхоні, Ов'єдо та Авілесі. Ми не просто виконуємо технічне завдання, а створюємо ергономічний, безпечний та довговічний простір для життя та бізнесу на основі детальних розрахунків та перевірених технологій.",
+          advantages: resolved.advantages || [
+            "Багаторічний практичний досвід у сфері ремонту та оздоблення",
+            "Виконання робіт «під ключ»",
+            "Високі стандарти якості на кожному етапі",
+            "Прозорість кошторису та вартості робіт",
+            "Дотримання узгоджених термінів",
+            "Постійний звʼязок із замовником",
+            "Індивідуальний підхід до кожного проєкту",
+            "Робота як з приватними, так і з комерційними обʼєктами",
+            "Використання сучасних технологій та матеріалів",
+            "Контроль якості на всіх етапах виконання"
+          ],
+          values_title: resolved.values_title || "Наші цінності",
+          values_text: resolved.values_text || "Компанія Asturbau — це команда кваліфікованих майстрів із понад 10-річним досвідом у сфері внутрішнього оздоблення та інженерних робіт в Астурії. Ми працюємо чесно, прозоро та відповідально: фіксуємо остаточну вартість робіт у договорі, використовуємо сертифіковані матеріали, що відповідають чинним нормативам, та забезпечуємо повну поетапну звітність перед замовником на кожній стадії оздоблювальних робіт.",
+          process: resolved.process || [
+            { step: "01", title: "Перший контакт", desc: "Обговорюємо ваші потреби та задачі" },
+            { step: "02", title: "Виїзд на обʼєкт", desc: "Приїжджаємо на обʼєкт, робимо заміри й оцінюємо обсяг майбутніх робіт." },
+            { step: "03", title: "Кошторис", desc: "Готуємо повний розрахунок вартості з деталізованим списком матеріалів, робіт і встановлюємо терміни виконання." },
+            { step: "04", title: "Договір", desc: "Фіксуємо обсяг, терміни та ціну" },
+            { step: "05", title: "Виконання", desc: "Робота згідно з графіком" },
+            { step: "06", title: "Контроль", desc: "Контроль якості на всіх етапах" },
+            { step: "07", title: "Здача обʼєкта", desc: "Приймання готового результату" }
+          ]
+        };
+      }
+    }
+    return resolved;
+  })();
+
   const c = data.contacts ?? {};
-  const services: Array<{ title: string; desc: string }> = h.services ?? [];
 
   const process: Array<{ step: string; title: string; desc: string }> = h.process ?? [];
   const testimonials: Array<{ name: string; text: string; rating?: number }> =
     h.testimonials ?? DEFAULT_TESTIMONIALS;
   const galleryList = (gallery ?? []) as Array<any>;
   const featured = galleryList.filter((g) => g.featured_on_home);
-  const portfolio = (featured.length > 0 ? featured : galleryList)
+  const portfolio = featured
     .slice()
     .sort((a, b) => {
       if (a.featured_on_home && b.featured_on_home) {
@@ -113,7 +225,7 @@ function HomePage() {
     { n: t("trust.item4.n"), l: t("trust.item4.l") },
   ];
 
-  const FAQ = [
+  const FAQ = h.faq ?? [
     { q: t("faq.q1"), a: t("faq.a1") },
     { q: t("faq.q2"), a: t("faq.a2") },
     { q: t("faq.q3"), a: t("faq.a3") },
@@ -150,7 +262,7 @@ function HomePage() {
               {h.hero_title || t("hero.title.default")}
             </h1>
             <p className="mt-6 max-w-xl text-lg text-white/75">
-              {t("hero.subtitle")}
+              {h.hero_subtitle || t("hero.subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
@@ -174,16 +286,24 @@ function HomePage() {
         <div className="container-x grid md:grid-cols-12 gap-10 items-center">
           <ScrollReveal className="md:col-span-6">
             <p className="text-xs uppercase tracking-[0.25em] text-accent font-semibold">{t("about.tag")}</p>
-            <h2 className="mt-3 text-4xl md:text-5xl">{t("about.title")}</h2>
-            <p className="mt-5 text-muted-foreground leading-relaxed">
-              {t("about.p1")}
-            </p>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
-              {t("about.p2")}&nbsp;
-            </p>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
-              {t("about.p3")}
-            </p>
+            <h2 className="mt-3 text-4xl md:text-5xl">{h.about_title || t("about.title")}</h2>
+            {h.about_text ? (
+              <p className="mt-5 text-muted-foreground leading-relaxed whitespace-pre-line">
+                {h.about_text}
+              </p>
+            ) : (
+              <>
+                <p className="mt-5 text-muted-foreground leading-relaxed">
+                  {t("about.p1")}
+                </p>
+                <p className="mt-4 text-muted-foreground leading-relaxed">
+                  {t("about.p2")}&nbsp;
+                </p>
+                <p className="mt-4 text-muted-foreground leading-relaxed">
+                  {t("about.p3")}
+                </p>
+              </>
+            )}
           </ScrollReveal>
           <ScrollReveal className="md:col-span-6" delay={200}>
             <div className="relative aspect-square w-full max-w-lg mx-auto">
@@ -209,25 +329,31 @@ function HomePage() {
             <h2 className="mt-3 text-4xl md:text-5xl">{t("services.title")}</h2>
           </ScrollReveal>
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-6 gap-4">
-            {SERVICE_DEFS.map((s, i) => {
-              const Icon = ICONS[i % ICONS.length];
+            {(h.services_cards || SERVICE_DEFS.map((s: any) => ({
+              title: s.title,
+              desc: s.shortDesc,
+              image: s.image,
+              serviceSlug: s.slug
+            }))).map((s: any, i: number) => {
+              const Icon = ICON_MAP[s.icon] || ICONS[i % ICONS.length];
               const smSpans = ["sm:col-span-4", "sm:col-span-2", "sm:col-span-2", "sm:col-span-4", "sm:col-span-4", "sm:col-span-2"];
               const span = smSpans[i % smSpans.length];
+              const bgImage = PATH_MAP[s.image] || s.image || SERVICE_IMAGES[s.serviceSlug] || collageLiving;
               return (
                 <ScrollReveal
-                  key={s.title}
+                  key={i}
                   className={span}
                   delay={i * 100}
                 >
                   <Link
                     id={`service-${i}`}
                     to="/services/$slug"
-                    params={{ slug: s.slug }}
+                    params={{ slug: s.serviceSlug || "remont-pid-kliuch" }}
                     className="group relative overflow-hidden bg-card border border-border hover:border-accent transition-colors min-h-[360px] md:min-h-[420px] isolate flex flex-col justify-end scroll-mt-20 w-full h-full rounded-lg"
                   >
                     <div
                       className="absolute inset-0 bg-cover bg-center -z-10"
-                      style={{ backgroundImage: `url(${s.image})` }}
+                      style={{ backgroundImage: `url(${bgImage})` }}
                       aria-hidden
                     />
                     <div
@@ -241,7 +367,7 @@ function HomePage() {
                     </div>
                     <div className="relative p-6 md:p-8">
                       <h3 className="text-xl text-white [text-shadow:0_2px_8px_rgb(0_0_0_/_0.6)]">{s.title}</h3>
-                      <p className="mt-2 text-sm text-white/85 [text-shadow:0_1px_6px_rgb(0_0_0_/_0.7)]">{s.shortDesc}</p>
+                      <p className="mt-2 text-sm text-white/85 [text-shadow:0_1px_6px_rgb(0_0_0_/_0.7)]">{s.desc}</p>
                       <div className="mt-3 inline-flex items-center gap-1 text-accent text-sm font-medium">
                         {t("services.more")} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </div>
@@ -292,8 +418,7 @@ function HomePage() {
                     <div className={`hidden md:block ${isEven ? "" : "text-right"}`}>
                       {!isEven && (
                         <div className="pt-1">
-                          <span className="font-display text-4xl text-accent/80 font-medium">{p.step}</span>
-                          <h3 className="mt-2 text-xl font-semibold text-foreground">{p.title}</h3>
+                          <h3 className="text-xl font-semibold text-foreground">{p.title}</h3>
                           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
                         </div>
                       )}
@@ -309,8 +434,7 @@ function HomePage() {
                     {/* Right side text block (visible on mobile, and on desktop for even items) */}
                     <div className={`col-start-2 ${isEven ? "md:col-start-3 text-left" : "md:col-start-3 md:hidden text-left"}`}>
                       <div className="pt-1">
-                        <span className="font-display text-3xl text-accent/80 font-medium md:hidden">{p.step}</span>
-                        <h3 className="mt-1 md:mt-2 text-xl font-semibold text-foreground">{p.title}</h3>
+                        <h3 className="text-xl font-semibold text-foreground">{p.title}</h3>
                         <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
                       </div>
                     </div>
@@ -345,14 +469,23 @@ function HomePage() {
                       aria-label={item.title ?? t("portfolio.altDefault")}
                     >
                       {item.type === "video" ? (
-                        <video
-                          src={item.thumbnail_url ? item.url : `${item.url}#t=0.5`}
-                          poster={item.thumbnail_url ?? undefined}
-                          muted
-                          playsInline
-                          preload="metadata"
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                        />
+                        getYouTubeEmbedUrl(item.url) ? (
+                          <img
+                            src={item.thumbnail_url || `https://img.youtube.com/vi/${item.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/)?.[2] || ""}/hqdefault.jpg`}
+                            alt={item.title ?? t("portfolio.altDefault")}
+                            loading="lazy"
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <video
+                            src={item.thumbnail_url ? item.url : `${item.url}#t=0.5`}
+                            poster={item.thumbnail_url ?? undefined}
+                            muted
+                            playsInline
+                            preload="metadata"
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                          />
+                        )
                       ) : (
                         <img
                           src={item.thumbnail_url ?? item.url}
@@ -407,6 +540,54 @@ function HomePage() {
               </ScrollReveal>
             ))}
           </div>
+          
+          {/* Google Business Review CTA */}
+          {(h.google_business_link || h.google_review_link) && (
+            <ScrollReveal className="mt-12" delay={250}>
+              <div className="max-w-xl mx-auto bg-card border border-border p-6 rounded-2xl text-center shadow-sm relative overflow-hidden group">
+                <div className="absolute -inset-px bg-gradient-to-r from-amber-500/10 to-blue-500/10 rounded-2xl blur-lg group-hover:opacity-100 transition duration-1000 opacity-70" />
+                <div className="relative z-10 flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-500 font-semibold text-lg">G</span>
+                    <span className="text-red-500 font-semibold text-lg">o</span>
+                    <span className="text-amber-500 font-semibold text-lg">o</span>
+                    <span className="text-blue-500 font-semibold text-lg">g</span>
+                    <span className="text-green-500 font-semibold text-lg">l</span>
+                    <span className="text-red-500 font-semibold text-lg">e</span>
+                    <span className="text-foreground/60 text-sm ml-1 font-medium">Business</span>
+                  </div>
+                  <div className="flex items-center gap-0.5 text-amber-400">
+                    <Star className="h-4.5 w-4.5 fill-current" />
+                    <Star className="h-4.5 w-4.5 fill-current" />
+                    <Star className="h-4.5 w-4.5 fill-current" />
+                    <Star className="h-4.5 w-4.5 fill-current" />
+                    <Star className="h-4.5 w-4.5 fill-current animate-pulse" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {lang === "es" 
+                      ? "Valoramos su opinión. Comparta su experiencia con nosotros en Google Business."
+                      : "Ми цінуємо вашу думку! Поділіться своїм досвідом роботи з нами в Google Business."}
+                  </p>
+                  <div className="flex flex-wrap gap-3 justify-center mt-2">
+                    {h.google_business_link && (
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={h.google_business_link} target="_blank" rel="noopener noreferrer">
+                          {lang === "es" ? "Ver perfil en Maps" : "Дивитись профіль на Картах"}
+                        </a>
+                      </Button>
+                    )}
+                    {h.google_review_link && (
+                      <Button size="sm" className="bg-accent text-accent-foreground hover:bg-accent/90" asChild>
+                        <a href={h.google_review_link} target="_blank" rel="noopener noreferrer">
+                          {lang === "es" ? "Escribir reseña" : "Написати відгук"}
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          )}
         </div>
       </section>
 

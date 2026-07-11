@@ -1,21 +1,15 @@
 import { createFileRoute, ErrorComponent } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Phone, Mail, Clock, MessageCircle, Send } from "lucide-react";
-import { getSiteContent } from "@/lib/content.functions";
+import { siteContentQuery } from "@/lib/content.functions";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { LeadForm } from "@/components/LeadForm";
 import { useLanguage } from "@/i18n/context";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
-const contentQuery = queryOptions({
-  queryKey: ["site_content"],
-  queryFn: () => getSiteContent(),
-  staleTime: 60_000,
-});
-
 export const Route = createFileRoute("/contacts")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(contentQuery),
+  loader: ({ context }) => context.queryClient.ensureQueryData(siteContentQuery),
   head: () => ({
     meta: [
       { title: "Contacto — Asturbau Construcción" },
@@ -31,11 +25,12 @@ export const Route = createFileRoute("/contacts")({
 });
 
 function ContactsPage() {
-  const { data } = useSuspenseQuery(contentQuery);
-  const { t } = useLanguage();
-  const c = data.contacts ?? {};
-  const phone = c.phone || "+34 643 329 216";
-  const email = c.email || "info@asturbau.com";
+  const { data } = useSuspenseQuery(siteContentQuery);
+  const { t, lang } = useLanguage();
+  const globalContacts = data.contacts ?? {};
+  const c = (globalContacts[lang] ?? globalContacts.es ?? globalContacts) ?? {};
+  const phone = globalContacts.phone || c.phone || "+34 643 329 216";
+  const email = globalContacts.email || c.email || "info@asturbau.com";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

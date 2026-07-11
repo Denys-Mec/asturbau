@@ -7,10 +7,11 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { LeadForm } from "@/components/LeadForm";
 import { Lightbox } from "@/components/Lightbox";
-import { getGallery } from "@/lib/content.functions";
+import { getGallery, siteContentQuery } from "@/lib/content.functions";
 import { getServices, getServiceBySlug, serviceExists } from "@/i18n/services";
 import { useLanguage } from "@/i18n/context";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { getYouTubeEmbedUrl } from "@/lib/utils";
 
 const galleryQuery = queryOptions({
   queryKey: ["gallery"],
@@ -20,6 +21,7 @@ const galleryQuery = queryOptions({
 
 export const Route = createFileRoute("/services/$slug")({
   loader: async ({ params, context }) => {
+    await context.queryClient.ensureQueryData(siteContentQuery);
     if (!serviceExists(params.slug)) throw notFound();
     await context.queryClient.ensureQueryData(galleryQuery);
     return { slug: params.slug };
@@ -139,14 +141,23 @@ function ServicePage() {
                         aria-label={item.title ?? t("portfolio.altDefault")}
                       >
                         {item.type === "video" ? (
-                          <video
-                            src={item.thumbnail_url ? item.url : `${item.url}#t=0.5`}
-                            poster={item.thumbnail_url ?? undefined}
-                            muted
-                            playsInline
-                            preload="metadata"
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                          />
+                          getYouTubeEmbedUrl(item.url) ? (
+                            <img
+                              src={item.thumbnail_url || `https://img.youtube.com/vi/${item.url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/)?.[2] || ""}/hqdefault.jpg`}
+                              alt={item.title ?? t("portfolio.altDefault")}
+                              loading="lazy"
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <video
+                              src={item.thumbnail_url ? item.url : `${item.url}#t=0.5`}
+                              poster={item.thumbnail_url ?? undefined}
+                              muted
+                              playsInline
+                              preload="metadata"
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                            />
+                          )
                         ) : (
                           <img
                             src={item.thumbnail_url ?? item.url}

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { getYouTubeEmbedUrl } from "@/lib/utils";
 
 export type LightboxItem = {
   id: string;
@@ -95,15 +96,25 @@ export function Lightbox({ items, index, onClose, onIndexChange }: Props) {
         </button>
 
         {item.type === "video" ? (
-          <video
-            key={item.id}
-            src={item.url}
-            poster={item.thumbnail_url ?? undefined}
-            controls
-            autoPlay
-            playsInline
-            className="max-h-full max-w-full object-contain"
-          />
+          getYouTubeEmbedUrl(item.url) ? (
+            <iframe
+              key={item.id}
+              src={getYouTubeEmbedUrl(item.url)!}
+              className="w-full max-w-[800px] aspect-video object-contain rounded-lg border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          ) : (
+            <video
+              key={item.id}
+              src={item.url}
+              poster={item.thumbnail_url ?? undefined}
+              controls
+              autoPlay
+              playsInline
+              className="max-h-full max-w-full object-contain"
+            />
+          )
         ) : (
           <img
             key={item.id}
